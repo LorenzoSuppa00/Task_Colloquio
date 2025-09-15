@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="it">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Security Report Dashboard</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  </head>
+  <body>
+    <h1>Security Report Dashboard</h1>
+
+    <!-- Output info dominio -->
+    <div id="output"></div>
+
+    <!-- Grafici -->
+    <div class="grid">
+      <div class="chart-card">
+        <h2>Punteggio di Rischio</h2>
+        <canvas id="riskChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h2>Vulnerabilità</h2>
+        <canvas id="vulnChart" height="220"></canvas>
+      </div>
+      <div class="chart-card">
+        <h2>Porte Esposte</h2>
+        <canvas id="portsChart" height="220"></canvas>
+      </div>
+    </div>
+
+    <script>
+      const output = document.getElementById('output');
+
+      const toNum = (v) => {
+        const n = Number(v);
+        return isNaN(n) ? 0 : Math.max(0, Math.min(100, n));
+      };
+
+      function normalizePorts(n_port) {
+        const labels = [];
+        const values = [];
+        if (!n_port || typeof n_port !== 'object') return { labels, values };
+        for (const k of Object.keys(n_port)) {
+          const v = n_port[k];
+          const n = (typeof v === 'object' && v !== null) ? Number(v.n || 0) : Number(v || 0);
+          labels.push(k);
+          values.push(isNaN(n) ? 0 : n);
+        }
+        return { labels, values };
+      }
+
+      function render(data) {
+        const result = (data && data.results && data.results[0]) ? data.results[0] : null;
+        if (!result) throw new Error('JSON privo di results[0]');
+
+        // Info base
+        output.innerHTML = `
+          <div class="card">
+            <div><span class="label">Dominio:</span> ${result.domain_name ?? '—'}</div>
+            <div><span class="label">Punteggio rischio:</span> ${result.risk_score ?? '—'}</div>
+            <div><span class="label">Creato:</span> ${result.creation_date ?? '—'}</div>
+            <div><span class="label">Ultima modifica:</span> ${result.last_edit ?? '—'}</div>
+            <div class="summary">
+              ${result.summary_text
+                .replace(/\*\*(.*?)\*\*/g, '<h3>$1</h3>')
+                .replace(/- /g, '')
+                .replace(/\n/g, '<p>')}
+            </div>
+          </div>
+          <div class="card">
+            <div><span class="label">Certificati attivi:</span> ${result.n_cert_attivi ?? '—'}</div>
+            <div><span class="label">Certificati scaduti:</span> ${result.n_cert_scaduti ?? '—'}</div>
+          </div>
+        `;
+
+        // Grafico rischio
+        const risk = toNum(result.risk_score);
+        new Chart(document.getElementById('riskChart'), {
+          type: 'doughnut',
+          data: {
+            labels: ['Rischio', 'Residuo'],
+            datasets: [{ data: [risk, 100 - risk], backgroundColor: ['#ef4444', '#22c55e'] }]
+          },
+          options: { plugins: { legend: { position: 'bottom' } }, cutout: '60%' }
+        });
+
+        // Grafico vulnerabilità
+        let total = result?.n_vulns?.total;
+        if (!total) {
+          const a = result?.n_vulns?.active || {};
+          const p = result?.n_vulns?.passive || {};
+          total = {
+            critical: (a.critical||0)+(p.critical||0),
+            high:     (a.high||0)+(p.high||0),
+            medium:   (a.medium||0)+(p.medium||0),
+            info:     (a.info||0)+(p.info||0),
+          };
+        }
+        new Chart(document.getElementById('vulnChart'), {
+          type: 'bar',
+          data: {
+            labels: ['Critical','High','Medium','Info'],
+            datasets: [{
+              label: 'Vulnerabilità',
+              data: [total.critical||0,total.high||0,total.medium||0,total.info||0],
+              backgroundColor: ['#dc2626','#f97316','#eab308','#3b82f6']
+            }]
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true } }
+          }
+        });
+
+        // Grafico porte esposte
+        const ports = normalizePorts(result.n_port);
+        new Chart(document.getElementById('portsChart'), {
+          type: 'bar',
+          data: {
+            labels: ports.labels,
+            datasets: [{ label: 'Esposizioni per porta', data: ports.values, backgroundColor: '#6366f1' }]
+          },
+          options: {
+            plugins: { legend: { display: false } },
+            scales: { y: { beginAtZero: true }, x: { title: { display: true, text: 'Porta' } } }
+          }
+        });
+      }
+
+      async function boot() {
+        try {
+          const res = await fetch('summary2.0.json', { cache: 'no-store' });
+          if (!res.ok) throw new Error('HTTP ' + res.status);
+          const data = await res.json();
+          render(data);
+        } catch (e) {
+          output.innerHTML = `<p class="error">Errore nel caricamento: ${e.message}</p>`;
+        }
+      }
+
+      boot();
+    </script>
+  </body>
+</html>
