@@ -1,5 +1,9 @@
 const output = document.getElementById("output");
-document.getElementById("btnSend").addEventListener("click", inviaReport);
+document.addEventListener("DOMContentLoaded", () => {
+  document.getElementById("inviaBtn")
+    .addEventListener("click", inviaReport);
+});
+
 
 const toNum = (v) => {
   const n = Number(v);
