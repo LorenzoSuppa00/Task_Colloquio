@@ -15,7 +15,7 @@ function normalizePorts(n_port) {
       typeof v === "object" && v !== null
         ? Number(v.n || 0)
         : Number(v || 0);
-    labels.push("Porta: " + k);
+    labels.push(k);
     values.push(isNaN(n) ? 0 : n);
   }
   return { labels, values };
