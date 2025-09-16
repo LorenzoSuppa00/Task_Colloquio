@@ -200,21 +200,27 @@ function filterSection(section) {
 async function inviaReport() {
   try {
     const base =
-      window.location.hostname === "localhost" ? "http://localhost:3000" : "";
+      window.location.hostname === "localhost"
+        ? "http://localhost:3000"
+        : "";
+
     const res = await fetch(`${base}/api/report`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         dominio: "esempio.com",
         risk_score: 75,
-        note: "Questo è un test",
-      }),
+        note: "Questo è un test"
+      })
     });
+
+    if (!res.ok) throw new Error("HTTP " + res.status);
 
     const result = await res.json();
     console.log("Risposta:", result);
     alert(result.message);
   } catch (err) {
     console.error("Errore POST:", err);
+    alert("Errore nell'invio del report");
   }
 }

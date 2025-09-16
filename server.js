@@ -16,11 +16,30 @@ app.get("/api/summary", (req, res) => {
   });
 });
 
-app.post("/api/report", (req, res) => {
-  const nuovo = req.body;
-  console.log("Ricevuto:", nuovo);
-  res.json({ message: "Report ricevuto con successo", report: nuovo });
+// POST per aggiungere un nuovo report
+app.post("/api/summary", (req, res) => {
+  try {
+    const file = path.join(__dirname, "summary2.0.json");
+    const raw = fs.readFileSync(file, "utf-8");
+    const data = JSON.parse(raw);
+
+    // Se non c'è results, lo inizializziamo
+    if (!data.results) data.results = [];
+
+    // Aggiungiamo i dati inviati dal frontend
+    const nuovo = req.body;
+    data.results.push(nuovo);
+
+    // Riscriviamo il file aggiornato
+    fs.writeFileSync(file, JSON.stringify(data, null, 2));
+
+    res.json({ message: "Report aggiunto con successo", nuovo });
+  } catch (err) {
+    console.error("Errore POST:", err);
+    res.status(500).json({ message: "Errore server" });
+  }
 });
+
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
