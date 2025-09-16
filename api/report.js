@@ -1,13 +1,19 @@
-export default async function handler(req, res) {
+export default function handler(req, res) {
   if (req.method !== "POST") {
-    return res.status(405).json({ error: "Method Not Allowed" });
+    return res.status(405).json({ error: "Metodo non consentito" });
   }
 
-  const nuovo = req.body;
-  console.log("Ricevuto report:", nuovo);
+  try {
+    const nuovo = req.body;
+    console.log("Ricevuto su Vercel:", nuovo);
 
-  res.status(200).json({
-    message: "Report ricevuto con successo",
-    report: nuovo
-  });
+    // simulazione salvataggio (non persistente su Vercel)
+    return res.status(200).json({
+      message: "Report ricevuto con successo",
+      report: nuovo,
+    });
+  } catch (err) {
+    console.error(err);
+    return res.status(500).json({ error: "Errore server" });
+  }
 }

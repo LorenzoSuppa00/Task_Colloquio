@@ -1,44 +1,22 @@
 <!DOCTYPE html>
 <html lang="it">
-  <head>
-    <meta charset="UTF-8" />
-    <title>Security Report Dashboard</title>
-    <link rel="stylesheet" href="styles.css" />
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Collego il file JS esterno -->
-    <script src="script.js" defer></script>
-  </head>
-  <body>
-    <h1>Security Report Dashboard</h1>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Security Report Dashboard</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+  <h1>Security Report Dashboard</h1>
 
-    <button onclick="inviaReport()">Invia Report</button>
+  <div class="controls">
+    <button id="inviaBtn">➕ Aggiungi Report</button>
+  </div>
 
-    <div class="filters">
-      <button onclick="filterSection('all')">Tutto</button>
-      <button onclick="filterSection('vulnerabilita')">Vulnerabilità</button>
-      <button onclick="filterSection('servizi')">Esposizione Servizi</button>
-      <button onclick="filterSection('dati')">Fuga di Dati</button>
-      <button onclick="filterSection('certificati')">Certificati</button>
-      <button onclick="filterSection('email')">Email</button>
-    </div>
+  <!-- Accordion container -->
+  <div id="accordion"></div>
 
-    <!-- Output info dominio -->
-    <div id="output"></div>
-
-    <!-- Grafici -->
-    <div class="grid">
-      <div class="chart-card">
-        <h2>Punteggio di Rischio</h2>
-        <canvas id="riskChart" height="220"></canvas>
-      </div>
-      <div class="chart-card">
-        <h2>Vulnerabilità</h2>
-        <canvas id="vulnChart" height="220"></canvas>
-      </div>
-      <div class="chart-card">
-        <h2>Porte Esposte</h2>
-        <canvas id="portsChart" height="220"></canvas>
-      </div>
-    </div>
-  </body>
+  <script src="script.js"></script>
+</body>
 </html>
