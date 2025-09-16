@@ -1,0 +1,8 @@
+{
+  "rewrites": [
+    {
+      "source": "/api/summary",
+      "destination": "/summary2.0.json"
+    }
+  ]
+}
