@@ -6,6 +6,7 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// GET: dati del report (legge il file)
 app.get("/api/summary", (req, res) => {
   fs.readFile("summary2.0.json", "utf8", (err, data) => {
     if (err) {
@@ -16,30 +17,13 @@ app.get("/api/summary", (req, res) => {
   });
 });
 
-// POST per aggiungere un nuovo report
-app.post("/api/summary", (req, res) => {
-  try {
-    const file = path.join(__dirname, "summary2.0.json");
-    const raw = fs.readFileSync(file, "utf-8");
-    const data = JSON.parse(raw);
-
-    // Se non c'è results, lo inizializziamo
-    if (!data.results) data.results = [];
-
-    // Aggiungiamo i dati inviati dal frontend
-    const nuovo = req.body;
-    data.results.push(nuovo);
-
-    // Riscriviamo il file aggiornato
-    fs.writeFileSync(file, JSON.stringify(data, null, 2));
-
-    res.json({ message: "Report aggiunto con successo", nuovo });
-  } catch (err) {
-    console.error("Errore POST:", err);
-    res.status(500).json({ message: "Errore server" });
-  }
+// POST: demo per ricevere/inserire un "nuovo report"
+// (In locale risponde; su Vercel statico non verrà usato)
+app.post("/api/report", (req, res) => {
+  const nuovo = req.body;
+  console.log("Ricevuto:", nuovo);
+  res.json({ message: "Report ricevuto con successo", report: nuovo });
 });
-
 
 const port = process.env.PORT || 3000;
 app.listen(port, () => {

@@ -1,8 +1,7 @@
 {
-  "rewrites": [
-    {
-      "source": "/api/summary",
-      "destination": "/summary2.0.json"
+  "functions": {
+    "api/*.js": {
+      "runtime": "nodejs18.x"
     }
-  ]
+  }
 }
