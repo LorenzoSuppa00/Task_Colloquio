@@ -1,20 +1,28 @@
 const express = require("express");
-const cors = require("cors");
 const fs = require("fs");
+const cors = require("cors");
+
 const app = express();
-const PORT = process.env.PORT || 3000;
-
 app.use(cors());
+app.use(express.json());
 
-// Carica i dati dal file summary2.0.json
-const rawData = fs.readFileSync("summary2.0.json");
-const summaryData = JSON.parse(rawData);
-
-// Endpoint API
-app.get("/api/reports", (req, res) => {
-  res.json(summaryData);
+app.get("/api/summary", (req, res) => {
+  fs.readFile("summary2.0.json", "utf8", (err, data) => {
+    if (err) {
+      res.status(500).json({ error: "Errore lettura file" });
+    } else {
+      res.json(JSON.parse(data));
+    }
+  });
 });
 
-app.listen(PORT, () => {
-  console.log(`Server avviato su http://localhost:${PORT}`);
+app.post("/api/report", (req, res) => {
+  const nuovo = req.body;
+  console.log("Ricevuto:", nuovo);
+  res.json({ message: "Report ricevuto con successo", report: nuovo });
+});
+
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server attivo su http://localhost:${port}`);
 });

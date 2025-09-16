@@ -12,10 +12,8 @@ function normalizePorts(n_port) {
   for (const k of Object.keys(n_port)) {
     const v = n_port[k];
     const n =
-      typeof v === "object" && v !== null
-        ? Number(v.n || 0)
-        : Number(v || 0);
-    labels.push(k);
+      typeof v === "object" && v !== null ? Number(v.n || 0) : Number(v || 0);
+    labels.push(`Porta ${k}`);
     values.push(isNaN(n) ? 0 : n);
   }
   return { labels, values };
@@ -43,12 +41,8 @@ function render(data) {
         <div><span class="label">Asset totali:</span> ${
           result.n_asset ?? "—"
         }</div>
-        <div><span class="label">IPv4:</span> ${
-          result.unique_ipv4 ?? "—"
-        }</div>
-        <div><span class="label">IPv6:</span> ${
-          result.unique_ipv6 ?? "—"
-        }</div>
+        <div><span class="label">IPv4:</span> ${result.unique_ipv4 ?? "—"}</div>
+        <div><span class="label">IPv6:</span> ${result.unique_ipv6 ?? "—"}</div>
     </div>
 
     <div class="card section dati">
@@ -165,8 +159,24 @@ function render(data) {
 
 async function boot() {
   try {
-    const res = await fetch("/api/summary", { cache: "no-store" });
-    if (!res.ok) throw new Error("HTTP " + res.status);
+    // Se sei in locale (localhost o 127.0.0.1) usa l'API Express su porta 3000
+    const base =
+      window.location.hostname === "localhost" ||
+      window.location.hostname === "127.0.0.1"
+        ? "http://localhost:3000"
+        : "";
+
+    let res;
+    try {
+      // Primo tentativo: chiamata all'API
+      res = await fetch(`${base}/api/summary`, { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+    } catch (err) {
+      // Se l'API non risponde, fallback sul file statico
+      res = await fetch("summary2.0.json", { cache: "no-store" });
+      if (!res.ok) throw new Error("HTTP " + res.status);
+    }
+
     const data = await res.json();
     render(data);
   } catch (e) {
@@ -185,4 +195,26 @@ function filterSection(section) {
       sec.style.display = "none";
     }
   });
+}
+
+async function inviaReport() {
+  try {
+    const base =
+      window.location.hostname === "localhost" ? "http://localhost:3000" : "";
+    const res = await fetch(`${base}/api/report`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        dominio: "esempio.com",
+        risk_score: 75,
+        note: "Questo è un test",
+      }),
+    });
+
+    const result = await res.json();
+    console.log("Risposta:", result);
+    alert(result.message);
+  } catch (err) {
+    console.error("Errore POST:", err);
+  }
 }
