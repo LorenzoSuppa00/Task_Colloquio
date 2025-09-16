@@ -1,11 +1,19 @@
-import { readFile } from "fs/promises";
+import fs from "fs";
+import path from "path";
 
-export default async function handler(req, res) {
+export default function handler(req, res) {
+  if (req.method !== "GET") {
+    return res.status(405).json({ error: "Metodo non consentito" });
+  }
+
+  const filePath = path.join(process.cwd(), "public", "summary2.0.json");
+
   try {
-    const file = await readFile("public/summary2.0.json", "utf8");
-    res.setHeader("Content-Type", "application/json");
-    res.status(200).send(file);
-  } catch (e) {
+    const data = fs.readFileSync(filePath, "utf8");
+    const jsonData = JSON.parse(data);
+    res.status(200).json(jsonData);
+  } catch (err) {
+    console.error(err);
     res.status(500).json({ error: "Errore lettura file" });
   }
 }
