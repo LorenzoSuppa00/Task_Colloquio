@@ -1,6 +1,26 @@
 const accordion = document.getElementById("accordion");
+
+// --- Stato filtro globale ---
+let activeFilter = "tutto"; // "tutto" | "vulnerabilita" | "servizi" | "dati" | "certificati" | "email"
+
 document.addEventListener("DOMContentLoaded", () => {
   document.getElementById("inviaBtn").addEventListener("click", inviaReport);
+
+  // Wiring barra filtri globale
+  const gf = document.getElementById("globalFilters");
+  if (gf) {
+    gf.addEventListener("click", (e) => {
+      const btn = e.target.closest("button[data-section]");
+      if (!btn) return;
+      activeFilter = btn.dataset.section;
+
+      // Aggiorna stato attivo UI
+      gf.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+
+      // Applica a tutte le card
+      applyGlobalFilter();
+    });
+  }
 });
 
 const toNum = (v) => {
@@ -22,6 +42,38 @@ function normalizePorts(n_port) {
   return { labels, values };
 }
 
+// Applica il filtro globale a TUTTE le card
+function applyGlobalFilter() {
+  document.querySelectorAll(".accordion-card").forEach(applyFilterToCard);
+}
+
+function updateLayoutClass(body) {
+  const visible = [...body.querySelectorAll(".section")]
+    .filter(sec => sec.style.display !== "none").length;
+
+  body.classList.remove("one-visible", "two-visible");
+  if (visible === 1) body.classList.add("one-visible");
+  if (visible === 2) body.classList.add("two-visible");
+}
+
+
+// Applica il filtro globale ad una singola card
+function applyFilterToCard(card) {
+  const body = card.querySelector(".accordion-body");
+  const sections = body.querySelectorAll(".section");
+
+  if (activeFilter === "tutto") {
+    sections.forEach(sec => (sec.style.display = "block"));
+  } else {
+    sections.forEach(sec => {
+      sec.style.display = sec.classList.contains(activeFilter) ? "block" : "none";
+    });
+  }
+
+  updateLayoutClass(body);
+}
+
+
 function renderReport(data, idx) {
   const result =
     data && data.results && data.results[0] ? data.results[0] : null;
@@ -36,14 +88,6 @@ function renderReport(data, idx) {
       <h3>Report #${idx + 1} — Rischio ${result.risk_score ?? "—"}</h3>
     </div>
     <div id="${collapseId}" class="accordion-body">
-
-      <div class="filters">
-        <button data-section="vulnerabilita">Vulnerabilità</button>
-        <button data-section="servizi">Esposizione Servizi</button>
-        <button data-section="dati">Fuga di Dati</button>
-        <button data-section="certificati">Certificati</button>
-        <button data-section="email">Email</button>
-      </div>
 
       <div class="card section vulnerabilita">
         <h4>Vulnerabilità</h4>
@@ -110,16 +154,6 @@ function renderReport(data, idx) {
     body.classList.toggle("open");
   });
 
-  // filtri locali
-  card.querySelectorAll(".filters button").forEach((btn) => {
-    btn.addEventListener("click", () => {
-      const section = btn.getAttribute("data-section");
-      card.querySelectorAll(".section").forEach((sec) => {
-        sec.style.display = sec.classList.contains(section) ? "block" : "none";
-      });
-    });
-  });
-
   // --- GRAFICI ---
   const risk = toNum(result.risk_score);
   new Chart(document.getElementById(`riskChart-${idx}`), {
@@ -130,7 +164,12 @@ function renderReport(data, idx) {
         { data: [risk, 100 - risk], backgroundColor: ["#ef4444", "#22c55e"] },
       ],
     },
-    options: { plugins: { legend: { position: "bottom" } }, cutout: "60%" },
+    options: { 
+      plugins: { legend: { position: "bottom" } }, 
+      cutout: "60%",
+      responsive: true,
+      maintainAspectRatio: false,    
+    },
   });
 
   let total = result?.n_vulns?.total;
@@ -163,6 +202,8 @@ function renderReport(data, idx) {
     options: {
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
+      responsive: true,
+      maintainAspectRatio: false,  
     },
   });
 
@@ -182,8 +223,13 @@ function renderReport(data, idx) {
     options: {
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
+      responsive: true,
+      maintainAspectRatio: false,  
     },
   });
+
+  // Applica subito il filtro globale corrente a questa card appena creata
+  applyFilterToCard(card);
 }
 
 async function boot() {
@@ -192,6 +238,7 @@ async function boot() {
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     renderReport(data, 0); // carica sempre il primo report da JSON
+    document.querySelector(".accordion-body")?.classList.add("open");
   } catch (e) {
     accordion.innerHTML = `<p class="error">Errore nel caricamento: ${e.message}</p>`;
   }

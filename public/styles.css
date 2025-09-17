@@ -1,3 +1,4 @@
+/* ====== Base ====== */
 body {
   font-family: Arial, sans-serif;
   margin: 2rem;
@@ -10,7 +11,7 @@ h1 {
   font-size: 2rem;
   font-weight: 700;
   color: #0f172a;
-  margin-bottom: 2rem;
+  margin-bottom: 1.25rem;
   position: relative;
 }
 h1::after {
@@ -23,58 +24,24 @@ h1::after {
   border-radius: 2px;
 }
 
-.card {
-  background: white;
-  border-radius: 8px;
-  padding: 1rem 1.5rem;
-  margin-bottom: 1.5rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-}
+.label { font-weight: bold; }
 
-.label {
-  font-weight: bold;
-}
+.error { color: #b91c1c; }
 
-.grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-  gap: 1.5rem;
+/* ====== Toolbar azioni (Aggiungi Report) ====== */
+.controls { text-align: left; margin: 0 0 0.75rem; }
+.controls #inviaBtn {
+  padding: 6px 10px;
+  border: 1px solid #c7c9ff;
+  background: #eef2ff;
+  color: #3730a3;
+  border-radius: 6px;
+  cursor: pointer;
 }
+.controls #inviaBtn:hover { background: #e0e7ff; }
 
-.chart-card {
-  background: white;
-  border-radius: 8px;
-  padding: 1rem;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-}
-.chart-card h2 {
-  font-size: 1rem;
-  margin-bottom: 0.5rem;
-}
-
-.summary h3 {
-  margin-top: 1rem;
-  margin-bottom: 0.4rem;
-  color: #1e293b;
-  font-size: 1.05rem;
-}
-
-.summary p {
-  margin: 0.2rem 0;
-  line-height: 1.4;
-}
-
-.error {
-  color: #b91c1c;
-}
-
-.filters {
-  text-align: center;
-  margin: 20px 0;
-}
+/* ====== Filtri globali ====== */
+.filters { text-align: center; margin: 14px 0 18px; }
 .filters button {
   margin: 5px;
   padding: 8px 14px;
@@ -84,22 +51,112 @@ h1::after {
   border-radius: 6px;
   cursor: pointer;
 }
-.filters button:hover {
-  background: #4f46e5;
+.filters button:hover { background: #4f46e5; }
+.filters button.active {
+  outline: 2px solid #4f46e5;
+  outline-offset: 1px;
 }
 
+/* ====== Accordion Reports ====== */
+.accordion-card {
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  margin-bottom: 1rem;
+  background: #fff;
+  overflow: hidden;
+}
+.accordion-header {
+  padding: 0.8rem 1rem;
+  background: #f3f4f6;
+  cursor: pointer;
+  user-select: none;
+}
+.accordion-header h3 {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+/* Corpo chiuso/aperto */
+.accordion-body { display: none; padding: 1rem; }
+.accordion-body.open {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+/* 1 sola sezione visibile: centrata e con max-width */
+.accordion-body.open.one-visible { grid-template-columns: 1fr; }
+.accordion-body.open.one-visible .section {
+  max-width: 920px;
+  justify-self: center;
+}
+
+/* 2 sezioni visibili: due colonne, centrate */
+.accordion-body.open.two-visible {
+  grid-template-columns: repeat(2, minmax(340px, 1fr));
+  justify-items: center;
+}
+.accordion-body.open.two-visible .section {
+  width: 100%;
+  max-width: 720px;
+}
+
+/* ====== Card interne (sezioni) ====== */
+.card,
+.section {
+  border: 1px solid #eef0f3;
+  border-radius: 8px;
+  padding: 1rem;
+  background: #ffffff;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.04);
+}
+.card h4,
+.section h4 {
+  margin: 0 0 0.5rem;
+  font-size: 0.95rem;
+  color: #1e293b;
+}
+
+/* ====== Canvas (grafici) ====== */
+.section canvas,
+.card canvas {
+  width: 100% !important;
+  height: 240px !important; /* 220–260 ok */
+}
+.section.email canvas { height: 220px !important; }
+
+/* ====== (Opzionali, se li usi altrove) ====== */
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 1.5rem;
+}
+.chart-card {
+  background: white;
+  border-radius: 8px;
+  padding: 1rem;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 300px;
+}
+.chart-card h2 { font-size: 1rem; margin-bottom: 0.5rem; }
+.summary h3 { margin: 1rem 0 0.4rem; color: #1e293b; font-size: 1.05rem; }
+.summary p { margin: 0.2rem 0; line-height: 1.4; }
+
+/* ====== Modal (se presente) ====== */
 .modal {
-  display: none; 
+  display: none;
   position: fixed;
   z-index: 1000;
-  left: 0;
-  top: 0;
-  width: 100%;
-  height: 100%;
+  inset: 0;
   overflow: auto;
   background-color: rgba(0,0,0,0.6);
 }
-
 .modal-content {
   background: #fff;
   margin: 10% auto;
@@ -109,71 +166,39 @@ h1::after {
   max-width: 600px;
   box-shadow: 0 5px 15px rgba(0,0,0,0.3);
 }
-
 .close {
   float: right;
   font-size: 24px;
   font-weight: bold;
   cursor: pointer;
 }
-.close:hover {
-  color: red;
-}
+.close:hover { color: red; }
 
-/* Accordion Reports */
-/* Accordion */
-.accordion-card {
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  margin-bottom: 1rem;
-  background: #fff;
-  overflow: hidden;
-}
-
-.accordion-header {
-  padding: 0.8rem 1rem;
-  background: #f3f4f6;
-  cursor: pointer;
-  user-select: none;
-}
-
-.accordion-header h3 {
-  margin: 0;
-  font-size: 1rem;
-}
-
-.accordion-body {
-  display: none;
-  padding: 1rem;
-}
-
-.accordion-body.open {
-  display: block;
-}
-
-/* Card interne */
-.card {
-  border: 1px solid #eee;
-  border-radius: 4px;
-  padding: 0.8rem;
-  margin-bottom: 1rem;
-  background: #fafafa;
-}
-
-.card h4 {
-  margin: 0 0 0.5rem;
-  font-size: 0.95rem;
-}
-
-/* Griglia per grafici */
+/* Grid base */
 .accordion-body {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 16px;
+  align-items: stretch; /* i contenuti allungano bene */
 }
 
-/* Canvas (grafici) */
-canvas {
-  max-width: 100%;
-  height: 240px !important; /* altezza fissa compatta */
+/* Quando resta solo 1 sezione → centrata e larga */
+.accordion-body.one-visible {
+  grid-template-columns: 1fr;
+  justify-items: center; /* forza centratura */
+}
+.accordion-body.one-visible .section {
+  width: 100%;
+  max-width: 960px; /* così occupa quasi tutto lo spazio */
+}
+
+/* Quando restano 2 sezioni → divise bene a metà */
+.accordion-body.two-visible {
+  grid-template-columns: 1fr 1fr;
+  gap: 24px; 
+  justify-items: center;
+}
+.accordion-body.two-visible .section {
+  width: 100%;
+  max-width: 720px;
 }

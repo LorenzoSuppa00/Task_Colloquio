@@ -10,6 +10,16 @@
 <body>
   <h1>Security Report Dashboard</h1>
 
+  <!-- FILTRI GLOBALI (una sola volta) -->
+  <div class="filters" id="globalFilters">
+    <button data-section="tutto" class="active">Tutto</button>
+    <button data-section="vulnerabilita">Vulnerabilità</button>
+    <button data-section="servizi">Esposizione Servizi</button>
+    <button data-section="dati">Fuga di Dati</button>
+    <button data-section="certificati">Certificati</button>
+    <button data-section="email">Email</button>
+  </div>
+
   <div class="controls">
     <button id="inviaBtn">➕ Aggiungi Report</button>
   </div>
