@@ -25,10 +25,9 @@ h1::after {
 }
 
 .label { font-weight: bold; }
-
 .error { color: #b91c1c; }
 
-/* ====== Toolbar azioni (Aggiungi Report) ====== */
+/* ====== Azioni ====== */
 .controls { text-align: left; margin: 0 0 0.75rem; }
 .controls #inviaBtn {
   padding: 6px 10px;
@@ -57,7 +56,7 @@ h1::after {
   outline-offset: 1px;
 }
 
-/* ====== Accordion Reports ====== */
+/* ====== Accordion ====== */
 .accordion-card {
   border: 1px solid #e5e7eb;
   border-radius: 8px;
@@ -78,25 +77,29 @@ h1::after {
   color: #0f172a;
 }
 
-/* Corpo chiuso/aperto */
+/* Corpo chiuso/aperto (niente duplicati) */
 .accordion-body { display: none; padding: 1rem; }
 .accordion-body.open {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
-  align-items: start;
+  align-items: stretch; /* uniforma l'altezza delle card */
 }
 
-/* 1 sola sezione visibile: centrata e con max-width */
-.accordion-body.open.one-visible { grid-template-columns: 1fr; }
+/* 1 sola sezione visibile: centrata e larga */
+.accordion-body.open.one-visible {
+  grid-template-columns: 1fr;
+  justify-items: center;
+}
 .accordion-body.open.one-visible .section {
-  max-width: 920px;
-  justify-self: center;
+  width: 100%;
+  max-width: 960px;
 }
 
-/* 2 sezioni visibili: due colonne, centrate */
+/* 2 sezioni visibili: due colonne centrate */
 .accordion-body.open.two-visible {
-  grid-template-columns: repeat(2, minmax(340px, 1fr));
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
   justify-items: center;
 }
 .accordion-body.open.two-visible .section {
@@ -105,30 +108,37 @@ h1::after {
 }
 
 /* ====== Card interne (sezioni) ====== */
-.card,
-.section {
+.section,
+.card {
   border: 1px solid #eef0f3;
   border-radius: 8px;
   padding: 1rem;
   background: #ffffff;
   box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
-.card h4,
-.section h4 {
+.section h4,
+.card h4 {
   margin: 0 0 0.5rem;
   font-size: 0.95rem;
   color: #1e293b;
 }
 
 /* ====== Canvas (grafici) ====== */
+/* Bar charts alti, niente "wide" */
 .section canvas,
 .card canvas {
   width: 100% !important;
-  height: 240px !important; /* 220–260 ok */
+  height: 300px !important;   /* più alti, niente schiacciamento */
 }
-.section.email canvas { height: 220px !important; }
 
-/* ====== (Opzionali, se li usi altrove) ====== */
+/* Doughnut più proporzionato e centrato */
+.section.email canvas {
+  height: 320px !important;   /* diametro maggiore, ben visibile */
+  display: block;
+  margin: 0 auto;
+}
+
+/* (Opzionali, se li usi altrove) */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -147,58 +157,3 @@ h1::after {
 .chart-card h2 { font-size: 1rem; margin-bottom: 0.5rem; }
 .summary h3 { margin: 1rem 0 0.4rem; color: #1e293b; font-size: 1.05rem; }
 .summary p { margin: 0.2rem 0; line-height: 1.4; }
-
-/* ====== Modal (se presente) ====== */
-.modal {
-  display: none;
-  position: fixed;
-  z-index: 1000;
-  inset: 0;
-  overflow: auto;
-  background-color: rgba(0,0,0,0.6);
-}
-.modal-content {
-  background: #fff;
-  margin: 10% auto;
-  padding: 20px;
-  border-radius: 8px;
-  width: 60%;
-  max-width: 600px;
-  box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-}
-.close {
-  float: right;
-  font-size: 24px;
-  font-weight: bold;
-  cursor: pointer;
-}
-.close:hover { color: red; }
-
-/* Grid base */
-.accordion-body {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
-  align-items: stretch; /* i contenuti allungano bene */
-}
-
-/* Quando resta solo 1 sezione → centrata e larga */
-.accordion-body.one-visible {
-  grid-template-columns: 1fr;
-  justify-items: center; /* forza centratura */
-}
-.accordion-body.one-visible .section {
-  width: 100%;
-  max-width: 960px; /* così occupa quasi tutto lo spazio */
-}
-
-/* Quando restano 2 sezioni → divise bene a metà */
-.accordion-body.two-visible {
-  grid-template-columns: 1fr 1fr;
-  gap: 24px; 
-  justify-items: center;
-}
-.accordion-body.two-visible .section {
-  width: 100%;
-  max-width: 720px;
-}

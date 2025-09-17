@@ -15,7 +15,9 @@ document.addEventListener("DOMContentLoaded", () => {
       activeFilter = btn.dataset.section;
 
       // Aggiorna stato attivo UI
-      gf.querySelectorAll("button").forEach(b => b.classList.toggle("active", b === btn));
+      gf.querySelectorAll("button").forEach((b) =>
+        b.classList.toggle("active", b === btn)
+      );
 
       // Applica a tutte le card
       applyGlobalFilter();
@@ -47,15 +49,16 @@ function applyGlobalFilter() {
   document.querySelectorAll(".accordion-card").forEach(applyFilterToCard);
 }
 
+// Aggiorna classi layout in base a quante sezioni restano visibili
 function updateLayoutClass(body) {
-  const visible = [...body.querySelectorAll(".section")]
-    .filter(sec => sec.style.display !== "none").length;
+  const visible = [...body.querySelectorAll(".section")].filter(
+    (sec) => sec.style.display !== "none"
+  ).length;
 
   body.classList.remove("one-visible", "two-visible");
   if (visible === 1) body.classList.add("one-visible");
   if (visible === 2) body.classList.add("two-visible");
 }
-
 
 // Applica il filtro globale ad una singola card
 function applyFilterToCard(card) {
@@ -63,16 +66,17 @@ function applyFilterToCard(card) {
   const sections = body.querySelectorAll(".section");
 
   if (activeFilter === "tutto") {
-    sections.forEach(sec => (sec.style.display = "block"));
+    sections.forEach((sec) => (sec.style.display = "block"));
   } else {
-    sections.forEach(sec => {
-      sec.style.display = sec.classList.contains(activeFilter) ? "block" : "none";
+    sections.forEach((sec) => {
+      sec.style.display = sec.classList.contains(activeFilter)
+        ? "block"
+        : "none";
     });
   }
 
   updateLayoutClass(body);
 }
-
 
 function renderReport(data, idx) {
   const result =
@@ -155,23 +159,38 @@ function renderReport(data, idx) {
   });
 
   // --- GRAFICI ---
+  // --- GRAFICI ---
+  // Punteggio complessivo (fallback finale)
   const risk = toNum(result.risk_score);
+
+  // Preferisci i punteggi email; fallback al rischio totale se assenti
+  const emailRisk =
+    result.rapporto_leak_email_score != null
+      ? toNum(result.rapporto_leak_email_score)
+      : result.spoofing_score != null
+      ? toNum(result.spoofing_score)
+      : risk;
+
   new Chart(document.getElementById(`riskChart-${idx}`), {
     type: "doughnut",
     data: {
-      labels: ["Rischio", "Residuo"],
+      labels: ["Rischio Email", "Residuo"],
       datasets: [
-        { data: [risk, 100 - risk], backgroundColor: ["#ef4444", "#22c55e"] },
+        {
+          data: [emailRisk, 100 - emailRisk],
+          backgroundColor: ["#ef4444", "#22c55e"],
+        },
       ],
     },
-    options: { 
-      plugins: { legend: { position: "bottom" } }, 
-      cutout: "60%",
+    options: {
       responsive: true,
-      maintainAspectRatio: false,    
+      maintainAspectRatio: false,
+      plugins: { legend: { position: "bottom" } },
+      cutout: "60%",
     },
   });
 
+  // Vulnerabilità (bar)
   let total = result?.n_vulns?.total;
   if (!total) {
     const a = result?.n_vulns?.active || {};
@@ -200,13 +219,14 @@ function renderReport(data, idx) {
       ],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
-      responsive: true,
-      maintainAspectRatio: false,  
     },
   });
 
+  // Esposizione Servizi (bar)
   const ports = normalizePorts(result.n_port);
   new Chart(document.getElementById(`portsChart-${idx}`), {
     type: "bar",
@@ -221,15 +241,17 @@ function renderReport(data, idx) {
       ],
     },
     options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
-      responsive: true,
-      maintainAspectRatio: false,  
     },
   });
 
   // Applica subito il filtro globale corrente a questa card appena creata
   applyFilterToCard(card);
+
+  return card;
 }
 
 async function boot() {
@@ -238,7 +260,7 @@ async function boot() {
     if (!res.ok) throw new Error("HTTP " + res.status);
     const data = await res.json();
     renderReport(data, 0); // carica sempre il primo report da JSON
-    document.querySelector(".accordion-body")?.classList.add("open");
+    document.querySelector(".accordion-body")?.classList.add("open"); // apri il primo
   } catch (e) {
     accordion.innerHTML = `<p class="error">Errore nel caricamento: ${e.message}</p>`;
   }
@@ -260,13 +282,22 @@ async function inviaReport() {
           n_cert_scaduti: 1,
           n_port: { 80: { n: 3 }, 443: { n: 5 } },
           n_dataleak: {
-            total: { domain_stealer: 1, potential_stealer: 0, other_stealer: 2 },
+            total: {
+              domain_stealer: 1,
+              potential_stealer: 0,
+              other_stealer: 2,
+            },
           },
           email_security: { spoofable: "No", dmarc_policy: "Reject" },
         },
       ],
     };
-    renderReport(nuovo, document.querySelectorAll(".accordion-card").length);
+
+    const idx = document.querySelectorAll(".accordion-card").length;
+    const card = renderReport(nuovo, idx);
+    const body = card.querySelector(".accordion-body");
+    body.classList.add("open");
+    card.scrollIntoView({ behavior: "smooth", block: "start" });
   } catch (err) {
     console.error("Errore POST:", err);
     alert("Errore nell'invio del report");
