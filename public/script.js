@@ -116,26 +116,19 @@ function renderReport(data, idx) {
 
       <div class="card section dati">
         <h4>Fuga di Dati</h4>
-        <div><span class="label">Domain stealer:</span> ${
-          result?.n_dataleak?.total?.domain_stealer ?? "—"
-        }</div>
-        <div><span class="label">Potential stealer:</span> ${
-          result?.n_dataleak?.total?.potential_stealer ?? "—"
-        }</div>
-        <div><span class="label">Other stealer:</span> ${
-          result?.n_dataleak?.total?.other_stealer ?? "—"
-        }</div>
+        <div><span class="label">Domain stealer:</span> ${result?.n_dataleak?.total?.domain_stealer ?? "—"}</div>
+        <div><span class="label">Potential stealer:</span> ${result?.n_dataleak?.total?.potential_stealer ?? "—"}</div>
+        <div><span class="label">Other stealer:</span> ${result?.n_dataleak?.total?.other_stealer ?? "—"}</div>
+        <canvas id="leakChart-${idx}"></canvas>
       </div>
 
       <div class="card section certificati">
         <h4>Certificati</h4>
-        <div><span class="label">Attivi:</span> ${
-          result.n_cert_attivi ?? "—"
-        }</div>
-        <div><span class="label">Scaduti:</span> ${
-          result.n_cert_scaduti ?? "—"
-        }</div>
+        <div><span class="label">Attivi:</span> ${result.n_cert_attivi ?? "—"}</div>
+        <div><span class="label">Scaduti:</span> ${result.n_cert_scaduti ?? "—"}</div>
+        <canvas id="certChart-${idx}"></canvas>
       </div>
+
 
       <div class="card section email">
         <h4>Sicurezza Email</h4>
@@ -159,25 +152,17 @@ function renderReport(data, idx) {
   });
 
   // --- GRAFICI ---
-  // --- GRAFICI ---
   // Punteggio complessivo (fallback finale)
+  // --- GRAFICO RISCHIO TOTALE ---
   const risk = toNum(result.risk_score);
-
-  // Preferisci i punteggi email; fallback al rischio totale se assenti
-  const emailRisk =
-    result.rapporto_leak_email_score != null
-      ? toNum(result.rapporto_leak_email_score)
-      : result.spoofing_score != null
-      ? toNum(result.spoofing_score)
-      : risk;
 
   new Chart(document.getElementById(`riskChart-${idx}`), {
     type: "doughnut",
     data: {
-      labels: ["Rischio Email", "Residuo"],
+      labels: ["Rischio Totale", "Residuo"],
       datasets: [
         {
-          data: [emailRisk, 100 - emailRisk],
+          data: [risk, 100 - risk],
           backgroundColor: ["#ef4444", "#22c55e"],
         },
       ],
@@ -185,7 +170,10 @@ function renderReport(data, idx) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
-      plugins: { legend: { position: "bottom" } },
+      plugins: {
+        legend: { position: "bottom" },
+        title: { display: true, text: "Rischio Totale" },
+      },
       cutout: "60%",
     },
   });
@@ -226,7 +214,7 @@ function renderReport(data, idx) {
     },
   });
 
-  // Esposizione Servizi (bar)
+  // Esposizione Servizi
   const ports = normalizePorts(result.n_port);
   new Chart(document.getElementById(`portsChart-${idx}`), {
     type: "bar",
@@ -243,16 +231,87 @@ function renderReport(data, idx) {
     options: {
       responsive: true,
       maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          enabled: true,
+          callbacks: {
+            label: (ctx) => `Esposizioni per porta: ${ctx.raw}`,
+          },
+        },
+      },
+      interaction: {
+        mode: "nearest",
+        intersect: false,
+      },
+      hover: {
+        mode: "nearest",
+        intersect: false,
+      },
+      scales: { y: { beginAtZero: true } },
+    },
+  });
+
+    // --- GRAFICO FUGA DI DATI ---
+  const leaks = [
+    result?.n_dataleak?.total?.domain_stealer || 0,
+    result?.n_dataleak?.total?.potential_stealer || 0,
+    result?.n_dataleak?.total?.other_stealer || 0,
+  ];
+
+  new Chart(document.getElementById(`leakChart-${idx}`), {
+    type: "bar",
+    data: {
+      labels: ["Domain", "Potential", "Other"],
+      datasets: [
+        {
+          label: "Fuga di Dati",
+          data: leaks,
+          backgroundColor: ["#dc2626", "#f97316", "#3b82f6"],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: { y: { beginAtZero: true } },
     },
   });
+
+  // --- GRAFICO CERTIFICATI ---
+  const certs = [result.n_cert_attivi || 0, result.n_cert_scaduti || 0];
+
+  new Chart(document.getElementById(`certChart-${idx}`), {
+    type: "doughnut",
+    data: {
+      labels: ["Attivi", "Scaduti"],
+      datasets: [
+        {
+          data: certs,
+          backgroundColor: ["#22c55e", "#ef4444"],
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { position: "bottom" },
+        title: { display: true, text: "Certificati" },
+      },
+      cutout: "60%",
+    },
+  });
+
 
   // Applica subito il filtro globale corrente a questa card appena creata
   applyFilterToCard(card);
 
   return card;
 }
+
+
 
 async function boot() {
   try {
