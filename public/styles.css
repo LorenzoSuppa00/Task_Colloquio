@@ -30,14 +30,21 @@ h1::after {
 /* ====== Azioni ====== */
 .controls { text-align: left; margin: 0 0 0.75rem; }
 .controls #inviaBtn {
-  padding: 6px 10px;
-  border: 1px solid #c7c9ff;
-  background: #eef2ff;
-  color: #3730a3;
-  border-radius: 6px;
+  font-size: 1.1rem;   /* testo più grande */
+  padding: 12px 24px;  /* più spazio interno */
+  background-color: #4f46e5; /* blu acceso */
+  color: #fff;         /* testo bianco */
+  border: none;
+  border-radius: 8px;
   cursor: pointer;
+  transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
-.controls #inviaBtn:hover { background: #e0e7ff; }
+
+.controls #inviaBtn:hover {
+  background-color: #4f46e5; /* blu più scuro al passaggio */
+  transform: scale(1.05);   /* leggero ingrandimento */
+}
+
 
 /* ====== Filtri globali ====== */
 .filters { text-align: center; margin: 14px 0 18px; }
