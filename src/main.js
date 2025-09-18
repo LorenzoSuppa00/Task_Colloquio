@@ -106,19 +106,22 @@ function renderReport(result, rowId) {
   const portsId = `portsChart-${key}`;
   const dataleakId = `dataleakChart-${key}`;
   const certId = `certChart-${key}`;
+  const domainLabel = result?.domain_name ?? "—";
+
 
   const displayIndex = document.querySelectorAll(".accordion-card").length + 1;
 
   const card = document.createElement("div");
   card.classList.add("accordion-card");
   card.dataset.reportId = rowId || ""; // utile per delete
+  
 
   card.innerHTML = `
     <div class="accordion-header" data-target="${collapseId}">
       <h3>Report #${displayIndex} — Rischio ${result?.risk_score ?? "—"}</h3>
       <button class="delete-report">Elimina</button>
     </div>
-
+    <div class="domain-banner">${domainLabel}</div>
     <div id="${collapseId}" class="accordion-body">
 
       <div class="card section vulnerabilita">
@@ -314,11 +317,15 @@ async function boot() {
 // ---------- Aggiungi Report ----------
 async function inviaReport() {
   try {
+    const domain = "manual.demo";
+    const risk = Math.floor(Math.random() * 100);
+
     const payload = {
-      domain_name: "manual.demo",
-      risk_score: Math.floor(Math.random() * 100),
+      domain_name: domain,
+      risk_score: risk,
       raw_json: {
-        risk_score: Math.floor(Math.random() * 100),
+        domain_name: domain,               // <— serve per mostrare il titolo dominio
+        risk_score: risk,                  // coerente col campo principale
         n_vulns: { total: { critical: 1, high: 2, medium: 3, info: 4 } },
         n_asset: 10,
         unique_ipv4: 5,
@@ -334,16 +341,21 @@ async function inviaReport() {
     };
 
     // Inserisci e rendi con l'ID reale
-    const { data, error } = await supabase.from("reports").insert(payload).select();
+    const { data, error } = await supabase
+      .from("reports")
+      .insert(payload)
+      .select("id, raw_json");
+
     if (error) throw error;
 
     const row = data[0];
     const card = renderReport(row.raw_json, row.id);
     const body = card.querySelector(".accordion-body");
-    body.classList.add("open");
+    if (body) body.classList.add("open");
     card.scrollIntoView({ behavior: "smooth", block: "start" });
 
-    reindexReports(); // aggiorna solo “Report #N”
+    // Aggiorna solo “Report #N” (testo), gli ID restano stabili
+    reindexReports();
   } catch (err) {
     console.error("Errore inserimento:", err);
     alert("Errore nell'invio del report");
