@@ -30,21 +30,19 @@ h1::after {
 /* ====== Azioni ====== */
 .controls { text-align: left; margin: 0 0 0.75rem; }
 .controls #inviaBtn {
-  font-size: 1.1rem;   /* testo più grande */
-  padding: 12px 24px;  /* più spazio interno */
-  background-color: #4f46e5; /* blu acceso */
-  color: #fff;         /* testo bianco */
+  font-size: 1.1rem;
+  padding: 12px 24px;
+  background-color: #4f46e5;
+  color: #fff;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: background-color 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
-
 .controls #inviaBtn:hover {
-  background-color: #4f46e5; /* blu più scuro al passaggio */
-  transform: scale(1.05);   /* leggero ingrandimento */
+  background-color: #3730a3;
+  transform: scale(1.05);
 }
-
 
 /* ====== Filtri globali ====== */
 .filters { text-align: center; margin: 14px 0 18px; }
@@ -84,16 +82,16 @@ h1::after {
   color: #0f172a;
 }
 
-/* Corpo chiuso/aperto (niente duplicati) */
+/* Corpo chiuso/aperto */
 .accordion-body { display: none; padding: 1rem; }
 .accordion-body.open {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: 16px;
-  align-items: stretch; /* uniforma l'altezza delle card */
+  align-items: stretch;
 }
 
-/* 1 sola sezione visibile: centrata e larga */
+/* Layout dinamico */
 .accordion-body.open.one-visible {
   grid-template-columns: 1fr;
   justify-items: center;
@@ -102,8 +100,6 @@ h1::after {
   width: 100%;
   max-width: 960px;
 }
-
-/* 2 sezioni visibili: due colonne centrate */
 .accordion-body.open.two-visible {
   grid-template-columns: 1fr 1fr;
   gap: 24px;
@@ -131,21 +127,24 @@ h1::after {
 }
 
 /* ====== Canvas (grafici) ====== */
-/* Bar charts alti, niente "wide" */
+/* Altezza e larghezza adattive + centrati */
 .section canvas,
 .card canvas {
-  width: 100% !important;
-  height: 300px !important;   /* più alti, niente schiacciamento */
-}
-
-/* Doughnut più proporzionato e centrato */
-.section.email canvas {
-  height: 320px !important;   /* diametro maggiore, ben visibile */
+  width: 100% !important;    /* usa tutta la card */
+  max-width: 540px;          /* non si allarga oltre */
+  height: auto !important;   /* mantiene proporzioni */
+  max-height: 240px;         /* limite verticale */
   display: block;
-  margin: 0 auto;
+  margin: 0 auto;            /* centrato dentro la card */
 }
 
-/* (Opzionali, se li usi altrove) */
+/* Doughnut leggermente più compatto */
+.section.email canvas {
+  max-width: 320px;
+  max-height: 240px;
+}
+
+/* ====== Layout opzionali ====== */
 .grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
@@ -159,8 +158,32 @@ h1::after {
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 300px;
+  height: 280px;
 }
 .chart-card h2 { font-size: 1rem; margin-bottom: 0.5rem; }
 .summary h3 { margin: 1rem 0 0.4rem; color: #1e293b; font-size: 1.05rem; }
 .summary p { margin: 0.2rem 0; line-height: 1.4; }
+
+/* Header della card posizionabile per il cestino */
+.accordion-header {
+  position: relative; /* serve per posizionare il pulsante delete */
+}
+
+/* Pulsante elimina report */
+.delete-report {
+  position: absolute;
+  right: 8px;
+  top: 8px;
+  background: transparent;
+  border: none;
+  font-size: 18px;
+  line-height: 1;
+  cursor: pointer;
+  color: #9ca3af; /* grigio */
+  padding: 4px;
+  border-radius: 6px;
+}
+.delete-report:hover {
+  color: #ef4444;           /* rosso */
+  background: #fee2e2;      /* rosino chiaro */
+}
