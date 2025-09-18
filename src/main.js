@@ -1,6 +1,6 @@
 import { createClient } from "@supabase/supabase-js";
 
-// ⚠️ Variabili da .env.local (Vite richiede il prefisso VITE_)
+// Variabili da .env.local 
 const supabase = createClient(
   import.meta.env.VITE_SUPABASE_URL,
   import.meta.env.VITE_SUPABASE_ANON_KEY
@@ -94,7 +94,7 @@ function renderReport(result, idx, rowId) {
   card.innerHTML = `
     <div class="accordion-header" data-target="${collapseId}">
       <h3>Report #${idx + 1} — Rischio ${result?.risk_score ?? "—"}</h3>
-      <button class="delete-report" title="Elimina report" aria-label="Elimina report">🗑️</button>
+      <button class="delete-report">Elimina</button>
     </div>
 
     <div id="${collapseId}" class="accordion-body">

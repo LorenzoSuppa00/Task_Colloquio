@@ -187,3 +187,18 @@ h1::after {
   color: #ef4444;           /* rosso */
   background: #fee2e2;      /* rosino chiaro */
 }
+
+.delete-report {
+  background-color: #dc2626; /* rosso */
+  color: #fff;              /* testo bianco */
+  border: none;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.delete-report:hover {
+  background-color: #b91c1c; /* rosso più scuro */
+}
